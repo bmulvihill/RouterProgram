@@ -1,0 +1,20 @@
+2013/10/13 20:10:47: Tick time: 30
+2013/10/13 20:10:47: Router Neighbors: {D=4, A=2, C=1}
+2013/10/13 20:21:17: Tick time: 30
+2013/10/13 20:21:17: Router Neighbors: {D=4, A=2, C=1}
+2013/10/13 20:24:26: Tick time: 30
+2013/10/13 20:24:26: Router Neighbors: {D=4, A=2, C=1}
+2013/10/13 20:24:56: Tick time: 30
+2013/10/13 20:24:56: Router Neighbors: {D=4, A=2, C=1}
+2013/10/13 20:25:29: Tick time: 30
+2013/10/13 20:25:29: Router Neighbors: {D=4, A=2, C=1}
+2013/10/13 20:26:55: Tick time: 30
+2013/10/13 20:26:55: Router Neighbors: {D=4, A=2, C=1}
+2013/10/13 20:27:04: Tick time: 30
+2013/10/13 20:27:04: Router Neighbors: {D=4, A=2, C=1}
+2013/10/13 20:27:22: Tick time: 30
+2013/10/13 20:27:22: Router Neighbors: {D=4, A=2, C=1}
+2013/10/13 20:29:07: Tick time: 30
+2013/10/13 20:29:07: Router Neighbors: {D=4, A=2, C=1}
+2013/10/13 20:29:39: Tick time: 30
+2013/10/13 20:29:39: Router Neighbors: {D=4, A=2, C=1}

@@ -14,14 +14,19 @@ import java.net.Socket;
  *
  * @author bmulvihill
  */
-public class RoutingServer {
+public class RoutingServer extends Thread {
     private int serverPort = Config.getInstance().serverPort;
     
     public RoutingServer(){
-        
+        Config config = Config.getInstance();
+        serverPort = config.serverPort;
+    }
+    
+    @Override
+    public void run(){
         try{  
             ServerSocket welcomeSocket = new ServerSocket(serverPort);   
-            System.out.println("Routing Server listening on port " + serverPort + "... ... ...");
+            System.out.println("IP Server Receiver listening on port " + serverPort + "... ... ...");
             while(true) { 
                     Socket clientSocket = welcomeSocket.accept(); 
                     Connection c = new Connection(clientSocket); 
@@ -65,9 +70,9 @@ class Connection extends Thread {
                             for(int s; (s=input.read(buffer)) != -1; )
                             {
                              System.out.println ("Receiving file with size : " + s);
-                              LinkStatePacket p = new LinkStatePacket(buffer);  
-                              Logger.log("Received Packet from :" + p.ownerIP + "| Packet Number: " + p.seqNum);;
-                              pq.add(p);
+                              //LinkStatePacket p = new LinkStatePacket(buffer);  
+                              //Logger.log("Received Packet from :" + p.ownerIP + "| Packet Number: " + p.seqNum);;
+                              //pq.add(p);
                               total += s;
                               if (total == nb) break;
                             }

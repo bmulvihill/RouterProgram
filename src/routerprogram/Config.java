@@ -15,7 +15,7 @@ import java.net.Inet4Address;
 
 public class Config {
     private static Config instance = null;
-    private static String ROUTER = "B";
+    protected static String ROUTER = "B";
     protected Config() {}
     
     public static Config getInstance() {
