@@ -95,6 +95,7 @@ class Connection extends Thread {
 
 /**
  * Data Structure to hold all received packets
+ * Move to Router Program? More to do with RouterUpdater
  * @author bmulvihill
  */
 class PacketList{
@@ -109,6 +110,10 @@ class PacketList{
       return instance;
     }
     
+    protected ArrayList<LinkStatePacket> getList(){
+      return received;  
+    }
+    
     protected synchronized void add(LinkStatePacket lsp){
         received.add(lsp);
     }
@@ -121,7 +126,7 @@ class PacketList{
         for (Iterator<LinkStatePacket> it = received.iterator(); it.hasNext(); ) {
             LinkStatePacket l = it.next();
             if(l.ownerIP.equals(lsp.ownerIP) && l.seqNum == lsp.seqNum){
-                System.out.println("Duplicate Packet , not forwarding: "+ lsp.ownerIP + " | " + lsp.seqNum);
+                //System.out.println("Duplicate Packet , not forwarding: "+ lsp.ownerIP + " | " + lsp.seqNum);
                 return true;
             }
         }

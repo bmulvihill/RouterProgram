@@ -31,6 +31,13 @@ class RoutingTick extends TimerTask{
     @Override
     public void run() {
         RoutingUpdater ru = new RoutingUpdater();
+        PacketList pl = PacketList.getInstance();
+        ArrayList<LinkStatePacket> list = pl.getList();
+        System.out.println("OwnerIP | TTL | SeqNum");
+        for (Iterator<LinkStatePacket> it = list.iterator(); it.hasNext(); ) {
+            LinkStatePacket l = it.next();
+            System.out.println(l.ownerIP + " | " + l.TTL + " | " + l.seqNum);
+        }
     }
 }
 
@@ -58,6 +65,7 @@ class RoutingUpdater {
             lsp.setSeqNum(RouterProgram.SEQNUM);
             lsp.setTTL(5);
             lsp.setNeighbors(c.routerNeighbors);
+            //pl.add(lsp);
             forwardPacket(lsp, entry.getKey());
             Logger.log("Packet: " + + lsp.seqNum + " sent to Router " + entry.getKey());
         }
@@ -66,8 +74,8 @@ class RoutingUpdater {
     
     private void forwardPacket(LinkStatePacket p, String destIP){
         try{
-           System.out.println("Forwaring Packet: " + p.ownerIP + " | " + p.seqNum + " to Router " + destIP);
-           Logger.log("Sending Packet: " + p.ownerIP + " | " + p.seqNum + " to Router " + destIP);
+           System.out.println("Forwarding Packet: " + p.ownerIP + " | " + p.seqNum + " to Router " + destIP);
+           Logger.log("Forwarding Packet: " + p.ownerIP + " | " + p.seqNum + " to Router " + destIP);
            Socket s = new Socket(destIP, Config.getInstance().serverPort);  
            OutputStream os = s.getOutputStream();  
            ObjectOutputStream oos = new ObjectOutputStream(os);  
