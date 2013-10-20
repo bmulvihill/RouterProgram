@@ -3,12 +3,8 @@
  */
 package routerprogram;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
 
 /**
  *
@@ -61,29 +57,26 @@ class Connection extends Thread {
 
 	  public void run() { 
 		try { 		                                
-			  //Step 1 read length
-			  int nb = input.readInt();
-			  System.out.println("Read Length: "+ nb);
-                          int total = 0;             
-                          byte buffer[] = new byte[config.packetSize + LinkStatePacket.HEADERSIZE];
-                            //Step 2 read byte
-                            for(int s; (s=input.read(buffer)) != -1; )
-                            {
-                             System.out.println ("Receiving file with size : " + s);
-                              //LinkStatePacket p = new LinkStatePacket(buffer);  
-                              //Logger.log("Received Packet from :" + p.ownerIP + "| Packet Number: " + p.seqNum);;
-                              //pq.add(p);
-                              total += s;
-                              if (total == nb) break;
-                            }
+                        ObjectInputStream ois = new ObjectInputStream(input);  
+                        LinkStatePacket lsp = (LinkStatePacket)ois.readObject();  
+                        if (lsp!=null){
+                            Logger.log("Packet received from " + lsp.ownerIP + " | Seq Num :" + lsp.seqNum);
+                            System.out.println("Packet received from " + lsp.ownerIP + " | Seq Num :" + lsp.seqNum);
+                        }  
+                        input.close();    
 			} 
+                        catch(ClassNotFoundException e){
+                            Logger.log(e.getMessage());
+                            System.out.println("Class Not Found:"+e.getMessage());  
+                        }
 			catch(EOFException e) {
                             Logger.log(e.getMessage());
-                            System.out.println("EOF:"+e.getMessage()); } 
+                            System.out.println("EOF:"+e.getMessage()); 
+                        } 
 			catch(IOException e) {
                             Logger.log(e.getMessage());
-                            System.out.println("IO:"+e.getMessage());}  
-   
+                            System.out.println("IO:"+e.getMessage());
+                        }  
 			finally { 
 			  try { 
                             clientSocket.close();

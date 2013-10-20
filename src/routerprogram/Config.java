@@ -15,7 +15,8 @@ import java.net.Inet4Address;
 
 public class Config {
     private static Config instance = null;
-    protected static String ROUTER = "B";
+    protected static String ROUTER;
+    protected static String NODE;
     protected Config() {}
     
     public static Config getInstance() {
@@ -27,13 +28,19 @@ public class Config {
     
     protected void setConfig(){
             try{
-                BufferedReader inFromUser = new BufferedReader(new FileReader("/Users/bmulvihill/desktop/router_config.txt"));
+                ROUTER = Inet4Address.getLocalHost().getHostAddress().toString();
+                Logger.log("Config Router Address: " + ROUTER);
+                BufferedReader inFromUser = new BufferedReader(new FileReader("router_config.txt"));
+                NODE = inFromUser.readLine();
+                Logger.log("NODE Set to: " + NODE);
                 tick_time = Integer.parseInt(inFromUser.readLine().split("\\W+")[1]);
-                System.out.println(tick_time);
-                Logger.log("Tick time: " + tick_time);
+                System.out.println("Router IP: " + ROUTER);
+                System.out.println("Router tick_time: " + tick_time);
+                Logger.log("Config File Tick time: " + tick_time);
                 String line;
                 while ((line = inFromUser.readLine()) != null) {
-                    List<String> row = Arrays.asList(line.split("\\W+"));
+                    List<String> row = Arrays.asList(line.split("\\t"));
+                    System.out.println("Router topology: " + row);
                     if (row.contains(ROUTER)){
                         String n = "";
                         if(row.get(0).equals(ROUTER)){ 
@@ -46,7 +53,7 @@ public class Config {
                 }
                 inFromUser.close();
                 System.out.println(routerNeighbors);
-                Logger.log("Router Neighbors: " + routerNeighbors);
+                Logger.log("Config file has set Router Neighbors: " + routerNeighbors);
                 
             }
             catch (FileNotFoundException e){
@@ -58,7 +65,7 @@ public class Config {
     }
     
     protected int packetSize;
-    protected int serverPort;
+    protected int serverPort = 7312;
     protected int tick_time;
     protected HashMap<String, String> routerNeighbors = new HashMap();
 }
