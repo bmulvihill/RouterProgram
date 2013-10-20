@@ -21,35 +21,53 @@ public class RouterProgram {
         RoutingServer rs = new RoutingServer();
         rs.start();
         Timer t = new Timer();
-        RoutingUpdater ru = new RoutingUpdater();
+        RoutingTick rt = new RoutingTick();
         //schedule routing updater to execute every 30 seconds or whatever the tick_time is set to
-        t.scheduleAtFixedRate(ru, 3 * (c.tick_time * 1000), c.tick_time * 1000);
+        t.scheduleAtFixedRate(rt, 3 * (c.tick_time * 1000), c.tick_time * 1000);
     }
 }
 
-class RoutingUpdater extends TimerTask{
+class RoutingTick extends TimerTask{
     @Override
     public void run() {
-        Config c = Config.getInstance();
+        RoutingUpdater ru = new RoutingUpdater();
+    }
+}
+
+class RoutingUpdater {
+    Config c = Config.getInstance();
+    // Packet List Contructor
+    public RoutingUpdater(LinkStatePacket lsp, String originIP){
+       for (Map.Entry<String, String> entry : c.routerNeighbors.entrySet()){
+           if(!entry.getKey().equals(lsp.ownerIP) && !entry.getKey().equals(originIP)){
+            forwardPacket(lsp, entry.getKey());
+           }
+        }
+    }
+    
+    //Timer Task Constructor
+    public RoutingUpdater() { 
+        PacketList pl = PacketList.getInstance();
+        pl.decrement();
         RouterProgram.SEQNUM += 1;
         System.out.println("in timer task");
         for (Map.Entry<String, String> entry : c.routerNeighbors.entrySet())
         {   
-            LinkStatePacket n = new LinkStatePacket();
-            n.setOwnerIP(c.ROUTER);
-            n.setSeqNum(RouterProgram.SEQNUM);
-            n.setTTL(5);
-            n.setNeighbors(c.routerNeighbors);
-            forwardPacket(n, entry.getKey());
-            Logger.log("Packet: " + + n.seqNum + " sent to Router " + entry.getKey());
+            LinkStatePacket lsp = new LinkStatePacket();
+            lsp.setOwnerIP(c.ROUTER);
+            lsp.setSeqNum(RouterProgram.SEQNUM);
+            lsp.setTTL(5);
+            lsp.setNeighbors(c.routerNeighbors);
+            forwardPacket(lsp, entry.getKey());
+            Logger.log("Packet: " + + lsp.seqNum + " sent to Router " + entry.getKey());
         }
        
     }
     
-    public void forwardPacket(LinkStatePacket p, String destIP){
+    private void forwardPacket(LinkStatePacket p, String destIP){
         try{
-           System.out.println("Sending Packet: " + + p.seqNum + " to Router " + destIP);
-           Logger.log("Sending Packet: " + + p.seqNum + " to Router " + destIP);
+           System.out.println("Forwaring Packet: " + p.ownerIP + " | " + p.seqNum + " to Router " + destIP);
+           Logger.log("Sending Packet: " + p.ownerIP + " | " + p.seqNum + " to Router " + destIP);
            Socket s = new Socket(destIP, Config.getInstance().serverPort);  
            OutputStream os = s.getOutputStream();  
            ObjectOutputStream oos = new ObjectOutputStream(os);  

@@ -5,6 +5,7 @@ package routerprogram;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 /**
  *
@@ -40,7 +41,8 @@ class Connection extends Thread {
 	DataOutputStream output; 
 	Socket clientSocket; 
 	Config config = Config.getInstance();
-        PacketQueue pq = PacketQueue.getInstance();
+        PacketList pl = PacketList.getInstance();
+        
         
 	public Connection (Socket aClientSocket) { 
 		try { 
@@ -58,10 +60,13 @@ class Connection extends Thread {
 	  public void run() { 
 		try { 		                                
                         ObjectInputStream ois = new ObjectInputStream(input);  
-                        LinkStatePacket lsp = (LinkStatePacket)ois.readObject();  
-                        if (lsp!=null){
-                            Logger.log("Packet received from " + lsp.ownerIP + " | Seq Num :" + lsp.seqNum);
-                            System.out.println("Packet received from " + lsp.ownerIP + " | Seq Num :" + lsp.seqNum);
+                        String originIP = clientSocket.getRemoteSocketAddress().toString().split(":")[0].substring(1);
+                        LinkStatePacket lsp = (LinkStatePacket)ois.readObject();
+                        if (lsp!=null && !pl.exists(lsp)){
+                            pl.add(lsp);
+                            Logger.log("Packet received: " + lsp.ownerIP + " | Seq Num :" + lsp.seqNum);
+                            System.out.println("Packet received: " + lsp.ownerIP + " | Seq Num :" + lsp.seqNum);      
+                            RoutingUpdater ru = new RoutingUpdater(lsp, originIP);      
                         }  
                         input.close();    
 			} 
@@ -86,4 +91,55 @@ class Connection extends Thread {
                           }
 			}
 		}
+}
+
+/**
+ * Data Structure to hold all received packets
+ * @author bmulvihill
+ */
+class PacketList{
+    private static PacketList instance = null;
+    private ArrayList<LinkStatePacket> received = new ArrayList();
+    protected PacketList() {}
+    
+    public static PacketList getInstance() {
+      if(instance == null) {
+         instance = new PacketList();
+      }
+      return instance;
+    }
+    
+    protected synchronized void add(LinkStatePacket lsp){
+        received.add(lsp);
+    }
+    
+    protected void remove(LinkStatePacket lsp){
+        received.remove(lsp);
+    }
+    
+    protected Boolean exists(LinkStatePacket lsp){
+        for (Iterator<LinkStatePacket> it = received.iterator(); it.hasNext(); ) {
+            LinkStatePacket l = it.next();
+            if(l.ownerIP.equals(lsp.ownerIP) && l.seqNum == lsp.seqNum){
+                System.out.println("Duplicate Packet , not forwarding: "+ lsp.ownerIP + " | " + lsp.seqNum);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    //decrement the TTL on all Packets
+    protected void decrement(){
+        for (Iterator<LinkStatePacket> it = received.iterator(); it.hasNext(); ) {
+            LinkStatePacket lsp = it.next();
+            lsp.TTL = lsp.TTL - 1;
+            Logger.log("Time to Live for Packet: " + lsp.seqNum + " from " + lsp.ownerIP + " | " + lsp.TTL);
+            if (lsp.TTL == 0) {
+                Logger.log("TTL Expired for Packet: " + lsp.seqNum + " from " + lsp.ownerIP);
+                it.remove();
+            }
+        }
+        
+    }
+   
 }
