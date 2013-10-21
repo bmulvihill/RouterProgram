@@ -60,12 +60,8 @@ class RoutingUpdater {
         System.out.println("in timer task");
         for (Map.Entry<String, String> entry : c.routerNeighbors.entrySet())
         {   
-            LinkStatePacket lsp = new LinkStatePacket();
-            lsp.setOwnerIP(c.ROUTER);
-            lsp.setSeqNum(RouterProgram.SEQNUM);
-            lsp.setTTL(5);
-            lsp.setNeighbors(c.routerNeighbors);
-            //pl.add(lsp);
+            LinkStatePacket lsp = new LinkStatePacket(RouterProgram.SEQNUM, 5, c.ROUTER, c.routerNeighbors);
+            pl.add(lsp);
             forwardPacket(lsp, entry.getKey());
             Logger.log("Packet: " + + lsp.seqNum + " sent to Router " + entry.getKey());
         }

@@ -11,37 +11,18 @@ import java.util.*;
  * @author bmulvihill
  */
 public class LinkStatePacket implements Serializable  {
-    public static int HEADERSIZE = 82;
-    protected int seqNum;
+    //protected int seqNum;
     protected int TTL;
     protected String ownerIP;
     protected HashMap neighbors;
+    protected int seqNum;
+    private static int SEQ = 0;
     
-    public void setTTL(int TTL){
+    LinkStatePacket(int num, int TTL, String IP, HashMap n){
         this.TTL = TTL;
-    }
-    
-    public void setOwnerIP(String IP){
         this.ownerIP = IP;
-    }
-    
-    public void setSeqNum(int num){
         seqNum = num;
-    }
-    
-    public void setNeighbors(HashMap n){
         neighbors = n;
     }
-    
-    LinkStatePacket(){}
-    /**
-    *
-    * Returns packet with header byte array
-    */
-    protected byte[] getPacket(){
-        return packet;
-    }
-    
-    private byte[] packet;
     
 }

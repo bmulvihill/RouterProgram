@@ -63,6 +63,7 @@ class Connection extends Thread {
                         String originIP = clientSocket.getRemoteSocketAddress().toString().split(":")[0].substring(1);
                         LinkStatePacket lsp = (LinkStatePacket)ois.readObject();
                         if (lsp!=null && !pl.exists(lsp)){
+                            lsp.TTL = lsp.TTL -1;
                             pl.add(lsp);
                             Logger.log("Packet received: " + lsp.ownerIP + " | Seq Num :" + lsp.seqNum);
                             System.out.println("Packet received: " + lsp.ownerIP + " | Seq Num :" + lsp.seqNum);      
@@ -115,6 +116,12 @@ class PacketList{
     }
     
     protected synchronized void add(LinkStatePacket lsp){
+        for (Iterator<LinkStatePacket> it = received.iterator(); it.hasNext(); ) {
+            LinkStatePacket l = it.next();
+            if(l.ownerIP.equals(lsp.ownerIP)){
+                it.remove();
+            }
+        }
         received.add(lsp);
     }
     
@@ -126,7 +133,6 @@ class PacketList{
         for (Iterator<LinkStatePacket> it = received.iterator(); it.hasNext(); ) {
             LinkStatePacket l = it.next();
             if(l.ownerIP.equals(lsp.ownerIP) && l.seqNum == lsp.seqNum){
-                //System.out.println("Duplicate Packet , not forwarding: "+ lsp.ownerIP + " | " + lsp.seqNum);
                 return true;
             }
         }
