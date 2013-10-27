@@ -11,10 +11,10 @@ import java.util.*;
  * @author bmulvihill
  */
 public class RouterProgram {
-    public static int SEQNUM;
     /**
      * @param args the command line arguments
      */
+    public static int SEQNUM = 0;
     public static void main(String[] args) {
         Config c = Config.getInstance();
         c.setConfig();
@@ -27,11 +27,13 @@ public class RouterProgram {
     }
 }
 
+//Time Task that executes every tick
 class RoutingTick extends TimerTask{
     @Override
     public void run() {
-        RoutingUpdater ru = new RoutingUpdater();
         PacketList pl = PacketList.getInstance();
+        RoutingUpdater ru = new RoutingUpdater(pl);
+        decrement(pl.getList());
         ArrayList<LinkStatePacket> list = pl.getList();
         System.out.println("OwnerIP | TTL | SeqNum");
         for (Iterator<LinkStatePacket> it = list.iterator(); it.hasNext(); ) {
@@ -39,11 +41,33 @@ class RoutingTick extends TimerTask{
             System.out.println(l.ownerIP + " | " + l.TTL + " | " + l.seqNum);
         }
     }
+    
+    protected void decrement(ArrayList received){
+        for (Iterator<LinkStatePacket> it = received.iterator(); it.hasNext(); ) {
+            LinkStatePacket lsp = it.next();
+            lsp.TTL = lsp.TTL - 1;
+            Logger.log("Time to Live for Packet: " + lsp.seqNum + " from " + lsp.ownerIP + " | " + lsp.TTL);
+            if (lsp.TTL == 0) {
+                Logger.log("TTL Expired for Packet: " + lsp.seqNum + " from " + lsp.ownerIP);
+                RoutingUpdater ru = new RoutingUpdater(lsp);
+                it.remove();
+            }
+        }
+    }
 }
 
+//Routing Updater - creates and send LSPs to be forwarded to router neighbors
 class RoutingUpdater {
     Config c = Config.getInstance();
-    // Packet List Contructor
+    
+    //simply forwards a given packet to all neighbors
+    public RoutingUpdater(LinkStatePacket lsp){
+        for (Map.Entry<String, String> entry : c.routerNeighbors.entrySet()){
+            forwardPacket(lsp, entry.getKey());
+        }
+    }
+    
+    //constructor for updates received from neighboring routers
     public RoutingUpdater(LinkStatePacket lsp, String originIP){
        for (Map.Entry<String, String> entry : c.routerNeighbors.entrySet()){
            if(!entry.getKey().equals(lsp.ownerIP) && !entry.getKey().equals(originIP)){
@@ -52,22 +76,20 @@ class RoutingUpdater {
         }
     }
     
-    //Timer Task Constructor
-    public RoutingUpdater() { 
-        PacketList pl = PacketList.getInstance();
-        pl.decrement();
-        RouterProgram.SEQNUM += 1;
+    //constructor for Updates that occur every tick
+    public RoutingUpdater(PacketList pl) { 
         System.out.println("in timer task");
+        LinkStatePacket lsp = new LinkStatePacket(RouterProgram.SEQNUM++, 5, c.ROUTER, c.routerNeighbors);
+        pl.add(lsp);
         for (Map.Entry<String, String> entry : c.routerNeighbors.entrySet())
         {   
-            LinkStatePacket lsp = new LinkStatePacket(RouterProgram.SEQNUM, 5, c.ROUTER, c.routerNeighbors);
-            pl.add(lsp);
             forwardPacket(lsp, entry.getKey());
             Logger.log("Packet: " + + lsp.seqNum + " sent to Router " + entry.getKey());
         }
        
     }
     
+    //forwards LSPs to router's neighbors
     private void forwardPacket(LinkStatePacket p, String destIP){
         try{
            System.out.println("Forwarding Packet: " + p.ownerIP + " | " + p.seqNum + " to Router " + destIP);

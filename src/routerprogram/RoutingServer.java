@@ -62,7 +62,14 @@ class Connection extends Thread {
                         ObjectInputStream ois = new ObjectInputStream(input);  
                         String originIP = clientSocket.getRemoteSocketAddress().toString().split(":")[0].substring(1);
                         LinkStatePacket lsp = (LinkStatePacket)ois.readObject();
-                        if (lsp!=null && !pl.exists(lsp)){
+                        //check if TTL = 0 and remove that from the PL and forward to neighbors
+                        if(lsp.TTL == 0){
+                            pl.remove(lsp);
+                            RoutingUpdater ru = new RoutingUpdater(lsp);
+                            Logger.log("Packet with TTL = 0 received, removed from PL: " + lsp.ownerIP + " | Seq Num :" + lsp.seqNum);
+                            System.out.println("Packet with TTL = 0 received, removed from PL: " + lsp.ownerIP + " | Seq Num :" + lsp.seqNum);
+                        }
+                        else if (lsp!=null && !pl.exists(lsp)){
                             lsp.TTL = lsp.TTL -1;
                             pl.add(lsp);
                             Logger.log("Packet received: " + lsp.ownerIP + " | Seq Num :" + lsp.seqNum);

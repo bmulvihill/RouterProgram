@@ -26,3 +26,9 @@ public class LinkStatePacket implements Serializable  {
     }
     
 }
+
+//possible create neighbor data structure to be held in array by LSP
+class Neighbor {
+    protected String IP;
+    protected int cost;
+}
