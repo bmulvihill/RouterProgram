@@ -38,7 +38,7 @@ class RoutingTick extends TimerTask{
         System.out.println("OwnerIP | TTL | SeqNum");
         for (Iterator<LinkStatePacket> it = list.iterator(); it.hasNext(); ) {
             LinkStatePacket l = it.next();
-            System.out.println(l.node.name + " | " + l.TTL + " | " + l.seqNum);
+            System.out.println(l.node.name + " | " + l.TTL + " | " + l.seqNum );
         }
     }
     

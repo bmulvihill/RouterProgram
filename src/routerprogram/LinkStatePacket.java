@@ -13,7 +13,7 @@ import java.util.*;
 public class LinkStatePacket implements Serializable  {
     //protected int seqNum;
     protected int TTL;
-    protected ArrayList<Edge> neighbors = new ArrayList();
+    protected HashMap<String, String> neighbors = new HashMap();
     protected Vertex node;
     protected int seqNum;
     private static int SEQ = 0;
@@ -22,9 +22,7 @@ public class LinkStatePacket implements Serializable  {
         this.TTL = TTL;
         seqNum = num;
         node = new Vertex(IP);
-        for (Map.Entry<String, String> entry : n.entrySet()){ 
-            neighbors.add(new Edge(node, Integer.parseInt(entry.getValue())));
-        }
+        neighbors = n;
     }
     
 }

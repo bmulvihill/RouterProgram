@@ -9,6 +9,7 @@ import java.util.PriorityQueue;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.*;
 
 class Vertex implements Serializable, Comparable<Vertex>
 {
@@ -38,30 +39,33 @@ public class Dijkstra
     Config c = Config.getInstance();
     
     public Dijkstra(){
+        System.out.println("In ALGORITHM");
+        ArrayList<Vertex> vertices = new ArrayList();
+        HashMap<String, Vertex> ver = new HashMap();
+
         for(LinkStatePacket lsp : pl.getList()){
-            Vertex v = new Vertex(lsp.node.name);
-           // v.adjacencies = new Edge[] {}
+           ver.put(lsp.node.name, lsp.node);     
         }
         
-	//v0.adjacencies = new Edge[]{ new Edge(v1, 5),
-	//                             new Edge(v2, 10),
-        //                       new Edge(v3, 8) };
-	//v1.adjacencies = new Edge[]{ new Edge(v0, 5),
-	//                             new Edge(v2, 3),
-	 //                            new Edge(v4, 7) };
-	//v2.adjacencies = new Edge[]{ new Edge(v0, 10),
-        //                       new Edge(v1, 3) };
-	//v3.adjacencies = new Edge[]{ new Edge(v0, 8),
-	//                             new Edge(v4, 2) };
-	//v4.adjacencies = new Edge[]{ new Edge(v1, 7),
-        //                       new Edge(v3, 2) };
-	//Vertex[] vertices = { v0, v1, v2, v3, v4 };
-        //computePaths(v0);
+        for(LinkStatePacket lsp : pl.getList()){
+            Vertex v = ver.get(lsp.node.name);
+            ArrayList<Edge> edges = new ArrayList();
+            for (Map.Entry<String, String> entry : lsp.neighbors.entrySet()){ 
+                edges.add(new Edge(ver.get(entry.getKey()), Integer.parseInt(entry.getValue())));
+            }
+            v.adjacencies = edges.toArray(new Edge[edges.size()]);
+        }
+        
+        computePaths(ver.get(c.ROUTER));
+        for (Map.Entry<String, Vertex> entry : ver.entrySet())
+        {  
+            System.out.println("Distance to " + entry.getValue() + ": " + entry.getValue().minDistance);
+            List<Vertex> path = getShortestPathTo(entry.getValue());
+	    System.out.println("Path: " + path);
+        }
         //for (Vertex v : vertices)
 	//{
-	 //   System.out.println("Distance to " + v + ": " + v.minDistance);
-	//    List<Vertex> path = getShortestPathTo(v);
-	//    System.out.println("Path: " + path);
+	
 	//}
     }
     

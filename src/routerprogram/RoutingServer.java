@@ -75,7 +75,7 @@ class Connection extends Thread {
                             Logger.log("Packet received: " + lsp.node.name + " | Seq Num :" + lsp.seqNum);
                             System.out.println("Packet received: " + lsp.node.name + " | Seq Num :" + lsp.seqNum);      
                             RoutingUpdater ru = new RoutingUpdater(lsp, originIP); 
-                            //Dijkstra d = new Dijkstra();
+                            Dijkstra d = new Dijkstra();
                         }  
                         input.close();    
 			} 
