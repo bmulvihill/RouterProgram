@@ -13,22 +13,18 @@ import java.util.*;
 public class LinkStatePacket implements Serializable  {
     //protected int seqNum;
     protected int TTL;
-    protected String ownerIP;
-    protected HashMap neighbors;
+    protected ArrayList<Edge> neighbors = new ArrayList();
+    protected Vertex node;
     protected int seqNum;
     private static int SEQ = 0;
     
-    LinkStatePacket(int num, int TTL, String IP, HashMap n){
+    LinkStatePacket(int num, int TTL, String IP, HashMap<String, String> n){
         this.TTL = TTL;
-        this.ownerIP = IP;
         seqNum = num;
-        neighbors = n;
+        node = new Vertex(IP);
+        for (Map.Entry<String, String> entry : n.entrySet()){ 
+            neighbors.add(new Edge(node, Integer.parseInt(entry.getValue())));
+        }
     }
     
-}
-
-//possible create neighbor data structure to be held in array by LSP
-class Neighbor {
-    protected String IP;
-    protected int cost;
 }

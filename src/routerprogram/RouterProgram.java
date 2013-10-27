@@ -38,7 +38,7 @@ class RoutingTick extends TimerTask{
         System.out.println("OwnerIP | TTL | SeqNum");
         for (Iterator<LinkStatePacket> it = list.iterator(); it.hasNext(); ) {
             LinkStatePacket l = it.next();
-            System.out.println(l.ownerIP + " | " + l.TTL + " | " + l.seqNum);
+            System.out.println(l.node.name + " | " + l.TTL + " | " + l.seqNum);
         }
     }
     
@@ -46,9 +46,9 @@ class RoutingTick extends TimerTask{
         for (Iterator<LinkStatePacket> it = received.iterator(); it.hasNext(); ) {
             LinkStatePacket lsp = it.next();
             lsp.TTL = lsp.TTL - 1;
-            Logger.log("Time to Live for Packet: " + lsp.seqNum + " from " + lsp.ownerIP + " | " + lsp.TTL);
+            Logger.log("Time to Live for Packet: " + lsp.seqNum + " from " + lsp.node.name + " | " + lsp.TTL);
             if (lsp.TTL == 0) {
-                Logger.log("TTL Expired for Packet: " + lsp.seqNum + " from " + lsp.ownerIP);
+                Logger.log("TTL Expired for Packet: " + lsp.seqNum + " from " + lsp.node.name);
                 RoutingUpdater ru = new RoutingUpdater(lsp);
                 it.remove();
             }
@@ -70,7 +70,7 @@ class RoutingUpdater {
     //constructor for updates received from neighboring routers
     public RoutingUpdater(LinkStatePacket lsp, String originIP){
        for (Map.Entry<String, String> entry : c.routerNeighbors.entrySet()){
-           if(!entry.getKey().equals(lsp.ownerIP) && !entry.getKey().equals(originIP)){
+           if(!entry.getKey().equals(lsp.node.name) && !entry.getKey().equals(originIP)){
             forwardPacket(lsp, entry.getKey());
            }
         }
@@ -79,7 +79,7 @@ class RoutingUpdater {
     //constructor for Updates that occur every tick
     public RoutingUpdater(PacketList pl) { 
         System.out.println("in timer task");
-        LinkStatePacket lsp = new LinkStatePacket(RouterProgram.SEQNUM++, 5, c.ROUTER, c.routerNeighbors);
+        LinkStatePacket lsp = new LinkStatePacket(RouterProgram.SEQNUM += 1, 5, c.ROUTER, c.routerNeighbors);
         pl.add(lsp);
         for (Map.Entry<String, String> entry : c.routerNeighbors.entrySet())
         {   
@@ -92,8 +92,8 @@ class RoutingUpdater {
     //forwards LSPs to router's neighbors
     private void forwardPacket(LinkStatePacket p, String destIP){
         try{
-           System.out.println("Forwarding Packet: " + p.ownerIP + " | " + p.seqNum + " to Router " + destIP);
-           Logger.log("Forwarding Packet: " + p.ownerIP + " | " + p.seqNum + " to Router " + destIP);
+           System.out.println("Forwarding Packet: " + p.node.name + " | " + p.seqNum + " to Router " + destIP);
+           Logger.log("Forwarding Packet: " + p.node.name + " | " + p.seqNum + " to Router " + destIP);
            Socket s = new Socket(destIP, Config.getInstance().serverPort);  
            OutputStream os = s.getOutputStream();  
            ObjectOutputStream oos = new ObjectOutputStream(os);  
