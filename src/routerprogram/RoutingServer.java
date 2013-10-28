@@ -66,14 +66,14 @@ class Connection extends Thread {
                         if(lsp.TTL == 0){
                             pl.remove(lsp);
                             RoutingUpdater ru = new RoutingUpdater(lsp);
-                            Logger.log("Packet with TTL = 0 received, removed from PL: " + lsp.node.name + " | Seq Num :" + lsp.seqNum);
-                            System.out.println("Packet with TTL = 0 received, removed from PL: " + lsp.node.name + " | Seq Num :" + lsp.seqNum);
+                            Logger.log("Packet with TTL = 0 received, removed from PL: " + lsp.name + " | Seq Num :" + lsp.seqNum);
+                            System.out.println("Packet with TTL = 0 received, removed from PL: " + lsp.name + " | Seq Num :" + lsp.seqNum);
                         }
                         else if (lsp!=null && !pl.exists(lsp)){
                             lsp.TTL = lsp.TTL -1;
                             pl.add(lsp);
-                            Logger.log("Packet received: " + lsp.node.name + " | Seq Num :" + lsp.seqNum);
-                            System.out.println("Packet received: " + lsp.node.name + " | Seq Num :" + lsp.seqNum);      
+                            Logger.log("Packet received: " + lsp.name + " | Seq Num :" + lsp.seqNum);
+                            System.out.println("Packet received: " + lsp.name + " | Seq Num :" + lsp.seqNum);      
                             RoutingUpdater ru = new RoutingUpdater(lsp, originIP); 
                             Dijkstra d = new Dijkstra();
                         }  
@@ -107,9 +107,10 @@ class Connection extends Thread {
  * Move to Router Program? More to do with RouterUpdater
  * @author bmulvihill
  */
-class PacketList{
-    private static PacketList instance = null;
+class PacketList{   
     private ArrayList<LinkStatePacket> received = new ArrayList();
+    private static PacketList instance = null;
+    protected HashMap<String, Vertex> topology = new HashMap();
     protected PacketList() {}
     
     public static PacketList getInstance() {
@@ -126,11 +127,12 @@ class PacketList{
     protected synchronized void add(LinkStatePacket lsp){
         for (Iterator<LinkStatePacket> it = received.iterator(); it.hasNext(); ) {
             LinkStatePacket l = it.next();
-            if(l.node.name.equals(lsp.node.name)){
+            if(l.name.equals(lsp.name)){
                 it.remove();
             }
         }
         received.add(lsp);
+        topology.put(lsp.name, new Vertex(lsp.name));
     }
     
     protected void remove(LinkStatePacket lsp){
@@ -140,25 +142,10 @@ class PacketList{
     protected Boolean exists(LinkStatePacket lsp){
         for (Iterator<LinkStatePacket> it = received.iterator(); it.hasNext(); ) {
             LinkStatePacket l = it.next();
-            if(l.node.name.equals(lsp.node.name) && l.seqNum == lsp.seqNum){
+            if(l.name.equals(lsp.name) && l.seqNum == lsp.seqNum){
                 return true;
             }
         }
         return false;
     }
-    
-    //decrement the TTL on all Packets
-    protected void decrement(){
-        for (Iterator<LinkStatePacket> it = received.iterator(); it.hasNext(); ) {
-            LinkStatePacket lsp = it.next();
-            lsp.TTL = lsp.TTL - 1;
-            Logger.log("Time to Live for Packet: " + lsp.seqNum + " from " + lsp.node.name + " | " + lsp.TTL);
-            if (lsp.TTL == 0) {
-                Logger.log("TTL Expired for Packet: " + lsp.seqNum + " from " + lsp.node.name);
-                it.remove();
-            }
-        }
-        
-    }
-   
 }

@@ -14,14 +14,13 @@ public class LinkStatePacket implements Serializable  {
     //protected int seqNum;
     protected int TTL;
     protected HashMap<String, String> neighbors = new HashMap();
-    protected Vertex node;
+    protected String name;
     protected int seqNum;
-    private static int SEQ = 0;
     
     LinkStatePacket(int num, int TTL, String IP, HashMap<String, String> n){
         this.TTL = TTL;
         seqNum = num;
-        node = new Vertex(IP);
+        name = IP;
         neighbors = n;
     }
     

@@ -39,16 +39,15 @@ public class Dijkstra
     Config c = Config.getInstance();
     
     public Dijkstra(){
-        System.out.println("In ALGORITHM");
         ArrayList<Vertex> vertices = new ArrayList();
         HashMap<String, Vertex> ver = new HashMap();
 
         for(LinkStatePacket lsp : pl.getList()){
-           ver.put(lsp.node.name, lsp.node);     
+           ver.put(lsp.name, new Vertex(lsp.name));     
         }
         
         for(LinkStatePacket lsp : pl.getList()){
-            Vertex v = ver.get(lsp.node.name);
+            Vertex v = ver.get(lsp.name);
             ArrayList<Edge> edges = new ArrayList();
             for (Map.Entry<String, String> entry : lsp.neighbors.entrySet()){ 
                 edges.add(new Edge(ver.get(entry.getKey()), Integer.parseInt(entry.getValue())));
@@ -63,10 +62,6 @@ public class Dijkstra
             List<Vertex> path = getShortestPathTo(entry.getValue());
 	    System.out.println("Path: " + path);
         }
-        //for (Vertex v : vertices)
-	//{
-	
-	//}
     }
     
     public static void computePaths(Vertex source)

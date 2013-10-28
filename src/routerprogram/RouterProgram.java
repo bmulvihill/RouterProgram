@@ -38,7 +38,7 @@ class RoutingTick extends TimerTask{
         System.out.println("OwnerIP | TTL | SeqNum");
         for (Iterator<LinkStatePacket> it = list.iterator(); it.hasNext(); ) {
             LinkStatePacket l = it.next();
-            System.out.println(l.node.name + " | " + l.TTL + " | " + l.seqNum );
+            System.out.println(l.name + " | " + l.TTL + " | " + l.seqNum );
         }
     }
     
@@ -46,9 +46,9 @@ class RoutingTick extends TimerTask{
         for (Iterator<LinkStatePacket> it = received.iterator(); it.hasNext(); ) {
             LinkStatePacket lsp = it.next();
             lsp.TTL = lsp.TTL - 1;
-            Logger.log("Time to Live for Packet: " + lsp.seqNum + " from " + lsp.node.name + " | " + lsp.TTL);
+            Logger.log("Time to Live for Packet: " + lsp.seqNum + " from " + lsp.name + " | " + lsp.TTL);
             if (lsp.TTL == 0) {
-                Logger.log("TTL Expired for Packet: " + lsp.seqNum + " from " + lsp.node.name);
+                Logger.log("TTL Expired for Packet: " + lsp.seqNum + " from " + lsp.name);
                 RoutingUpdater ru = new RoutingUpdater(lsp);
                 it.remove();
             }
@@ -70,7 +70,7 @@ class RoutingUpdater {
     //constructor for updates received from neighboring routers
     public RoutingUpdater(LinkStatePacket lsp, String originIP){
        for (Map.Entry<String, String> entry : c.routerNeighbors.entrySet()){
-           if(!entry.getKey().equals(lsp.node.name) && !entry.getKey().equals(originIP)){
+           if(!entry.getKey().equals(lsp.name) && !entry.getKey().equals(originIP)){
             forwardPacket(lsp, entry.getKey());
            }
         }
@@ -92,8 +92,8 @@ class RoutingUpdater {
     //forwards LSPs to router's neighbors
     private void forwardPacket(LinkStatePacket p, String destIP){
         try{
-           System.out.println("Forwarding Packet: " + p.node.name + " | " + p.seqNum + " to Router " + destIP);
-           Logger.log("Forwarding Packet: " + p.node.name + " | " + p.seqNum + " to Router " + destIP);
+           System.out.println("Forwarding Packet: " + p.name + " | " + p.seqNum + " to Router " + destIP);
+           Logger.log("Forwarding Packet: " + p.name + " | " + p.seqNum + " to Router " + destIP);
            Socket s = new Socket(destIP, Config.getInstance().serverPort);  
            OutputStream os = s.getOutputStream();  
            ObjectOutputStream oos = new ObjectOutputStream(os);  
