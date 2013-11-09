@@ -56,12 +56,17 @@ public class Dijkstra
         }
         
         computePaths(ver.get(c.ROUTER));
+        ForwardingTable ft = new ForwardingTable();
         for (Map.Entry<String, Vertex> entry : ver.entrySet())
         {  
             System.out.println("Distance to " + entry.getValue() + ": " + entry.getValue().minDistance);
             List<Vertex> path = getShortestPathTo(entry.getValue());
-	    System.out.println("Path: " + path);
+            if(entry.getValue().name != c.ROUTER){
+                ft.setTable(entry.getValue(), path.get(1));
+            }
+	    //System.out.println("Path: " + path);
         }
+        System.out.println(ft.table);
     }
     
     public static void computePaths(Vertex source)
