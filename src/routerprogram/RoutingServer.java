@@ -63,19 +63,28 @@ class Connection extends Thread {
                         String originIP = clientSocket.getRemoteSocketAddress().toString().split(":")[0].substring(1);
                         LinkStatePacket lsp = (LinkStatePacket)ois.readObject();
                         //check if TTL = 0 and remove that from the PL and forward to neighbors
-                        if(lsp.TTL == 0){
+                        if (lsp.link == false){
+                           config.routerNeighbors.remove(lsp.name);
+                           Logger.log("Link Down: " + lsp.name + " | Seq Num :" + lsp.seqNum);
+                           System.out.println("Link Down: " + lsp.name + " | Seq Num :" + lsp.seqNum);
+                        }
+                        else if(lsp.TTL == 0){
                             pl.remove(lsp);
-                            RoutingUpdater ru = new RoutingUpdater(lsp);
+                            RoutingUpdater ru = new RoutingUpdater(lsp, originIP);
                             Logger.log("Packet with TTL = 0 received, removed from PL: " + lsp.name + " | Seq Num :" + lsp.seqNum);
                             System.out.println("Packet with TTL = 0 received, removed from PL: " + lsp.name + " | Seq Num :" + lsp.seqNum);
                         }
+                       
                         else if (lsp!=null && !pl.exists(lsp)){
                             lsp.TTL = lsp.TTL -1;
                             pl.add(lsp);
                             Logger.log("Packet received: " + lsp.name + " | Seq Num :" + lsp.seqNum);
-                            System.out.println("Packet received: " + lsp.name + " | Seq Num :" + lsp.seqNum);      
+                            System.out.println("Packet received: " + lsp.name + " | Seq Num :" + lsp.seqNum + " | Neighbors: " + lsp.neighbors);      
                             RoutingUpdater ru = new RoutingUpdater(lsp, originIP); 
-                            Dijkstra d = new Dijkstra();
+                            if(RouterProgram.SEQNUM >= 2){
+                                System.out.println("Running Dijkstra");
+                                Dijkstra d = new Dijkstra();
+                            }
                         }  
                         input.close();    
 			} 

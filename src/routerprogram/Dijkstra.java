@@ -61,10 +61,10 @@ public class Dijkstra
         {  
             System.out.println("Distance to " + entry.getValue() + ": " + entry.getValue().minDistance);
             List<Vertex> path = getShortestPathTo(entry.getValue());
+            System.out.println("Shortest Path " + path);
             if(entry.getValue().name != c.ROUTER){
                 ft.setTable(entry.getValue(), path.get(1));
             }
-	    //System.out.println("Path: " + path);
         }
         System.out.println(ft.table);
     }

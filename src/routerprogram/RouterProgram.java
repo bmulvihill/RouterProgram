@@ -24,6 +24,41 @@ public class RouterProgram {
         RoutingTick rt = new RoutingTick();
         //schedule routing updater to execute every 30 seconds or whatever the tick_time is set to
         t.scheduleAtFixedRate(rt, 3 * (c.tick_time * 1000), c.tick_time * 1000);
+        UserCommand uc = new UserCommand();
+        uc.start();
+    }
+}
+
+class UserCommand extends Thread{
+    public void run(){
+        while (true){
+            try{
+                Config c = Config.getInstance();
+                RoutingUpdater ru = new RoutingUpdater();
+                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+                String[] args = br.readLine().split(" ");
+                if((args[2].toUpperCase().contains("DOWN"))){
+                    c.routerNeighbors.remove(args[1]);
+                    LinkStatePacket lsp = new LinkStatePacket(RouterProgram.SEQNUM+=1, 0, c.ROUTER, false);
+                    ru.forwardPacket(lsp, args[1]);
+                    System.out.println("Down");
+                } else if((args[2].toUpperCase().contains("UP"))){
+                    System.out.println("Up");              
+                } else if((args[2].toUpperCase().contains("CHANGE"))){
+                    System.out.println("Change");              
+                } else {
+                   System.out.println("Unrecognized Command"); 
+                }
+            }
+            catch (ArrayIndexOutOfBoundsException e){
+                System.out.println(e.getMessage());
+                continue;
+            }
+            catch (IOException e){
+                System.out.println(e.getMessage());
+                continue;
+            }
+        }
     }
 }
 
@@ -59,7 +94,7 @@ class RoutingTick extends TimerTask{
 //Routing Updater - creates and send LSPs to be forwarded to router neighbors
 class RoutingUpdater {
     Config c = Config.getInstance();
-    
+    public RoutingUpdater(){}
     //simply forwards a given packet to all neighbors
     public RoutingUpdater(LinkStatePacket lsp){
         for (Map.Entry<String, String> entry : c.routerNeighbors.entrySet()){
@@ -79,7 +114,7 @@ class RoutingUpdater {
     //constructor for Updates that occur every tick
     public RoutingUpdater(PacketList pl) { 
         System.out.println("in timer task");
-        LinkStatePacket lsp = new LinkStatePacket(RouterProgram.SEQNUM += 1, 5, c.ROUTER, c.routerNeighbors);
+        LinkStatePacket lsp = new LinkStatePacket(RouterProgram.SEQNUM += 1, 6, c.ROUTER, c.routerNeighbors);
         pl.add(lsp);
         for (Map.Entry<String, String> entry : c.routerNeighbors.entrySet())
         {   
@@ -90,7 +125,7 @@ class RoutingUpdater {
     }
     
     //forwards LSPs to router's neighbors
-    private void forwardPacket(LinkStatePacket p, String destIP){
+    protected void forwardPacket(LinkStatePacket p, String destIP){
         try{
            System.out.println("Forwarding Packet: " + p.name + " | " + p.seqNum + " to Router " + destIP);
            Logger.log("Forwarding Packet: " + p.name + " | " + p.seqNum + " to Router " + destIP);
